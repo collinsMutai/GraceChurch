@@ -1,40 +1,64 @@
 const express = require("express");
-const axios = require("axios");
 const cors = require("cors");
+const axios = require("axios");
+const mongoose = require("mongoose");
+require("dotenv").config();
+
 const { initiateSTKPush } = require("./stk");
+const sermonRoutes = require("./routes/sermonRoutes");
+const { startCron } = require("./utils/cron");
+
+// Import fetch functions and Sermon model
+const { fetchYouTubeSermons } = require("./utils/youtube");
+const { fetchFacebookSermons } = require("./utils/facebook");
+const Sermon = require("./models/Sermon");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ==== Config ====
-const YOUTUBE_API_KEY = "YOUR_YOUTUBE_API_KEY";
-const YOUTUBE_CHANNEL_ID = "YOUR_YOUTUBE_CHANNEL_ID";
-const FACEBOOK_PAGE_ID = "YOUR_FACEBOOK_PAGE_ID";
-const FACEBOOK_ACCESS_TOKEN = "YOUR_FACEBOOK_PAGE_ACCESS_TOKEN";
+// ==== Connect to MongoDB ====
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(async () => {
+    console.log("✅ MongoDB connected");
 
-// ==== Live Status State ====
+    // Check if sermons collection is empty on server start
+    const sermonCount = await Sermon.countDocuments();
+    if (sermonCount === 0) {
+      console.log("No sermons found. Fetching initial sermons from YouTube and Facebook...");
+      try {
+        await Promise.all([fetchYouTubeSermons(), fetchFacebookSermons()]);
+        console.log("✅ Initial sermons fetched successfully");
+      } catch (err) {
+        console.error("Error fetching initial sermons:", err.message);
+      }
+    }
+  })
+  .catch((err) => console.error("MongoDB connection error:", err.message));
+
+// ==== Live Stream Status ====
 let ytIsLive = false;
 let ytVideoId = null;
 let fbIsLive = false;
 let fbVideoId = null;
 let lastChecked = null;
 
-// ==== YouTube Live Check ====
+// YouTube Live check
 const checkYouTubeLive = async () => {
   try {
-    const res = await axios.get(
-      "https://www.googleapis.com/youtube/v3/search",
-      {
-        params: {
-          part: "snippet",
-          channelId: YOUTUBE_CHANNEL_ID,
-          eventType: "live",
-          type: "video",
-          key: YOUTUBE_API_KEY,
-        },
-      }
-    );
+    const res = await axios.get("https://www.googleapis.com/youtube/v3/search", {
+      params: {
+        part: "snippet",
+        channelId: process.env.YOUTUBE_CHANNEL_ID,
+        eventType: "live",
+        type: "video",
+        key: process.env.YOUTUBE_API_KEY,
+      },
+    });
     const items = res.data.items;
     ytIsLive = items && items.length > 0;
     ytVideoId = ytIsLive ? items[0].id.videoId : null;
@@ -43,15 +67,15 @@ const checkYouTubeLive = async () => {
   }
 };
 
-// ==== Facebook Live Check ====
+// Facebook Live check
 const checkFacebookLive = async () => {
   try {
     const res = await axios.get(
-      `https://graph.facebook.com/v17.0/${FACEBOOK_PAGE_ID}/live_videos`,
+      `https://graph.facebook.com/v17.0/${process.env.FACEBOOK_PAGE_ID}/live_videos`,
       {
         params: {
           status: "LIVE_NOW",
-          access_token: FACEBOOK_ACCESS_TOKEN,
+          access_token: process.env.FACEBOOK_ACCESS_TOKEN,
         },
       }
     );
@@ -63,15 +87,17 @@ const checkFacebookLive = async () => {
   }
 };
 
-// ==== Periodic Polling ====
+// Combined checker
 const checkLiveStatus = async () => {
   await Promise.all([checkYouTubeLive(), checkFacebookLive()]);
   lastChecked = new Date();
 };
 checkLiveStatus();
-setInterval(checkLiveStatus, 120000); // every 2 minutes
+setInterval(checkLiveStatus, 120000); // every 2 mins
 
-// ==== API Routes ====
+// ==== Routes ====
+app.use("/api/sermons", sermonRoutes);
+
 app.get("/api/live-status", (req, res) => {
   res.json({
     youtube: { isLive: ytIsLive, videoId: ytVideoId },
@@ -86,7 +112,7 @@ app.post("/api/mpesa/pay", async (req, res) => {
     const result = await initiateSTKPush(phoneNumber, amount);
     res.json({ message: "STK Push Sent", result });
   } catch (err) {
-    console.error("STK error:", err.response?.data || err.message);
+    console.error("STK error:", err.message);
     res.status(500).json({ error: "STK Push Failed" });
   }
 });
@@ -96,6 +122,9 @@ app.post("/api/mpesa/callback", (req, res) => {
   res.sendStatus(200);
 });
 
-app.listen(3001, () =>
-  console.log("✅ Server running on http://localhost:3001")
-);
+// ==== Start Server ====
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
+
+// ==== Start Cron ====
+startCron();
