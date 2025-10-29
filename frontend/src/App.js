@@ -6,6 +6,7 @@ import Sermons from "./components/Sermons/Sermons";
 import Gallery from "./components/pages/Gallery";
 import Donation from "./components/pages/Donation";
 import Contact from "./components/pages/Contact";
+import Footer from "./components/Footer/Footer"; // ✅ Added import
 import "./App.css";
 
 function App() {
@@ -31,44 +32,25 @@ function App() {
 
         {/* Desktop nav links */}
         <div className="nav-links desktop-only">
-          <NavLink
-            to="/"
-            className={({ isActive }) => (isActive ? "active-link" : "")}
-          >
+          <NavLink to="/" className={({ isActive }) => (isActive ? "active-link" : "")}>
             Home
           </NavLink>
-          <NavLink
-            to="/about"
-            className={({ isActive }) => (isActive ? "active-link" : "")}
-          >
+          <NavLink to="/about" className={({ isActive }) => (isActive ? "active-link" : "")}>
             About
           </NavLink>
-          <NavLink
-            to="/sermons"
-            className={({ isActive }) => (isActive ? "active-link" : "")}
-          >
+          <NavLink to="/sermons" className={({ isActive }) => (isActive ? "active-link" : "")}>
             Sermons
           </NavLink>
-          <NavLink
-            to="/gallery"
-            className={({ isActive }) => (isActive ? "active-link" : "")}
-          >
+          <NavLink to="/gallery" className={({ isActive }) => (isActive ? "active-link" : "")}>
             Gallery
           </NavLink>
-          <NavLink
-            to="/contact"
-            className={({ isActive }) => (isActive ? "active-link" : "")}
-          >
+          <NavLink to="/contact" className={({ isActive }) => (isActive ? "active-link" : "")}>
             Contact
           </NavLink>
         </div>
 
         <div className="nav-button desktop-only">
-          <NavLink
-            to="/donation"
-            className="give-button"
-            onClick={closeMobileMenu}
-          >
+          <NavLink to="/donation" className="give-button" onClick={closeMobileMenu}>
             Give
           </NavLink>
         </div>
@@ -85,54 +67,29 @@ function App() {
         </button>
       </nav>
 
-      {/* Mobile menu - slides down */}
-      <div
-        className={`mobile-menu mobile-only ${mobileMenuOpen ? "open" : ""}`}
-      >
-        <NavLink
-          to="/"
-          className={({ isActive }) => (isActive ? "active-link" : "")}
-          onClick={closeMobileMenu}
-        >
+      {/* Mobile menu */}
+      <div className={`mobile-menu mobile-only ${mobileMenuOpen ? "open" : ""}`}>
+        <NavLink to="/" onClick={closeMobileMenu} className={({ isActive }) => (isActive ? "active-link" : "")}>
           Home
         </NavLink>
-        <NavLink
-          to="/about"
-          className={({ isActive }) => (isActive ? "active-link" : "")}
-          onClick={closeMobileMenu}
-        >
+        <NavLink to="/about" onClick={closeMobileMenu} className={({ isActive }) => (isActive ? "active-link" : "")}>
           About
         </NavLink>
-        <NavLink
-          to="/sermons"
-          className={({ isActive }) => (isActive ? "active-link" : "")}
-          onClick={closeMobileMenu}
-        >
+        <NavLink to="/sermons" onClick={closeMobileMenu} className={({ isActive }) => (isActive ? "active-link" : "")}>
           Sermons
         </NavLink>
-        <NavLink
-          to="/gallery"
-          className={({ isActive }) => (isActive ? "active-link" : "")}
-          onClick={closeMobileMenu}
-        >
+        <NavLink to="/gallery" onClick={closeMobileMenu} className={({ isActive }) => (isActive ? "active-link" : "")}>
           Gallery
         </NavLink>
-        <NavLink
-          to="/contact"
-          className={({ isActive }) => (isActive ? "active-link" : "")}
-          onClick={closeMobileMenu}
-        >
+        <NavLink to="/contact" onClick={closeMobileMenu} className={({ isActive }) => (isActive ? "active-link" : "")}>
           Contact
         </NavLink>
-        <NavLink
-          to="/donation"
-          className="give-button"
-          onClick={closeMobileMenu}
-        >
+        <NavLink to="/donation" className="give-button" onClick={closeMobileMenu}>
           Give
         </NavLink>
       </div>
 
+      {/* App routes */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -141,6 +98,9 @@ function App() {
         <Route path="/donation" element={<Donation />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
+
+      {/* ✅ Footer Component */}
+      <Footer />
     </>
   );
 }

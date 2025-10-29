@@ -1,13 +1,27 @@
+/* ===================== Root Variables (Global) ===================== */
+:root {
+  --primary-color: #D102F7; /* Faith Blue */
+  --primary-dark: #8712FE; /* Darker shade for hover */
+  --text-color: #333;
+  --text-red-color: #D14F42;
+  --text-dark-red-color: #A2473E;
+  --muted-text: #6b7280;
+  --light-text: #9ca3af;
+  --bg-white: #ffffff;
+  --bg-dark: #3B3D4A;
+}
+
+/* ===================== Global Styles ===================== */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
