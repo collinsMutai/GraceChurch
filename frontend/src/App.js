@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import Home from "./components/pages/Home";
 import About from "./components/pages/About";
-import Sermons from "./components/pages/Sermons";
+import Sermons from "./components/Sermons/Sermons";
 import Gallery from "./components/pages/Gallery";
 import Donation from "./components/pages/Donation";
 import Contact from "./components/pages/Contact";

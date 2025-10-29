@@ -3,21 +3,22 @@ const mongoose = require("mongoose");
 const sermonSchema = new mongoose.Schema(
   {
     title: String,
-    videoId: String,
+    videoId: { type: String, index: true },
     thumbnail: String,
     description: String,
-    publishedAt: Date,
+    publishedAt: { type: Date, index: true },
     permalink: String,
     source: {
       type: String,
       enum: ["youtube", "facebook"],
       required: true,
+      index: true,
     },
   },
   { timestamps: true }
 );
 
-sermonSchema.index({ publishedAt: -1 });
-sermonSchema.index({ source: 1 });
+// ✅ Compound index for pagination performance
+sermonSchema.index({ source: 1, publishedAt: -1 });
 
 module.exports = mongoose.model("Sermon", sermonSchema);

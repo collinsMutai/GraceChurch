@@ -124,7 +124,8 @@ app.post("/api/mpesa/callback", (req, res) => {
 
 // ==== Start Server ====
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+  startCron(true); // 👈 run cron AND do initial sync once on deploy
+});
 
-// ==== Start Cron ====
-startCron();
