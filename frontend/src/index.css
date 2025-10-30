@@ -1,14 +1,14 @@
 /* ===================== Root Variables (Global) ===================== */
 :root {
-  --primary-color: #D102F7; /* Faith Blue */
-  --primary-dark: #8712FE; /* Darker shade for hover */
+  --primary-color: #d102f7; /* Faith Blue */
+  --primary-dark: #8712fe; /* Darker shade for hover */
   --text-color: #333;
-  --text-red-color: #D14F42;
-  --text-dark-red-color: #A2473E;
+  --text-red-color: #d14f42;
+  --text-dark-red-color: #a2473e;
   --muted-text: #6b7280;
   --light-text: #9ca3af;
   --bg-white: #ffffff;
-  --bg-dark: #3B3D4A;
+  --bg-dark: #3b3d4a;
 }
 
 /* ===================== Global Styles ===================== */
