@@ -4,24 +4,56 @@ const { mpesaLogger } = require("../utils/logger");
 
 exports.stkPush = async (req, res) => {
   const { phone, amount, type = "Other" } = req.body;
+
+  // Validate input parameters
+  if (!phone || !amount) {
+    mpesaLogger.warn("⚠️ Missing phone or amount", { phone, amount });
+    return res.status(400).json({
+      success: false,
+      message: "Phone and amount are required",
+    });
+  }
+
   try {
+    // Create a new transaction in the database
     const transaction = new MpesaTransaction({ phone, amount, type });
     await transaction.save();
 
+    // Call the MPESA service to initiate the STK push
     const result = await initiateStkPush({ phone, amount });
+
+    // Store the CheckoutRequestID in the transaction
     transaction.checkoutRequestID = result.CheckoutRequestID;
     await transaction.save();
 
-    mpesaLogger.info("✅ STK Push Initiated", { phone, amount, type, checkoutRequestID: result.CheckoutRequestID });
+    // Log the successful initiation
+    mpesaLogger.info("✅ STK Push Initiated", {
+      phone,
+      amount,
+      type,
+      checkoutRequestID: result.CheckoutRequestID,
+    });
 
+    // Send a successful response back to the client
     return res.status(200).json({
       success: true,
       message: result.CustomerMessage || "STK Push sent successfully",
       checkoutRequestID: result.CheckoutRequestID,
     });
   } catch (error) {
-    mpesaLogger.error("❌ STK Push Failed", { phone, amount, type, error: error.message });
-    return res.status(500).json({ success: false, message: "STK Push failed. Please try again." });
+    // Log error if the MPESA service fails
+    mpesaLogger.error("❌ STK Push Failed", {
+      phone,
+      amount,
+      type,
+      error: error.message,
+    });
+
+    // Respond with a generic error message
+    return res.status(500).json({
+      success: false,
+      message: "STK Push failed. Please try again.",
+    });
   }
 };
 

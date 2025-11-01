@@ -132,9 +132,15 @@ process.on("unhandledRejection", (reason, promise) => {
   serverLogger.error("💀 Unhandled Rejection", { reason, promise });
 });
 
-// ==== Start Server ====
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  if (shouldLog("info")) serverLogger.info(`🚀 Server running on http://localhost:${PORT}`);
-  startCron(true);
-});
+// ==== Start Server conditionally ====
+// Only start the server if we're not in a test environment
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    if (shouldLog("info")) serverLogger.info(`🚀 Server running on http://localhost:${PORT}`);
+    startCron(true);
+  });
+}
+
+// Export the app for testing
+module.exports = app;
