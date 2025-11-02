@@ -9,6 +9,7 @@ import Contact from "./components/pages/Contact";
 import Footer from "./components/Footer/Footer";
 import Navbar from "./components/Navbar/Navbar"; 
 import "./App.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (

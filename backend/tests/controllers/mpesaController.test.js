@@ -1,93 +1,85 @@
-const chai = require('chai');
-const expect = chai.expect;
-const sinon = require('sinon');
-const request = require('supertest');
-const app = require('../../server'); // Your Express app
-const MpesaTransaction = require('../../models/MpesaTransaction');
-const { initiateStkPush } = require('../../services/mpesaService');
-const { mpesaLogger } = require('../../utils/logger');
-const axios = require('axios');
-
-// Mock the initiateStkPush service
-sinon.stub(mpesaLogger, 'info');
-sinon.stub(mpesaLogger, 'error');
-sinon.stub(MpesaTransaction.prototype, 'save').resolves();
+const request = require("supertest");
+const { expect } = require("chai");  // Import expect from Chai
+const app = require("../../server");  // Ensure this points to your Express app
+const sinon = require("sinon");
+const mpesaService = require("../../services/mpesaService");
 
 describe("MPESA STK Push Controller", () => {
-  // Before each test, reset the stubs/mocks
+  let initiateStkPushStub;
+
+  // Setup stub before each test
   beforeEach(() => {
-    sinon.restore();
-  });
-
-  it("should return error if phone is missing", async () => {
-    const response = await request(app)
-      .post("/api/mpesa/stkpush")
-      .send({ amount: 1000, type: "Other" });
-
-    expect(response.status).to.equal(400);
-    expect(response.body.message).to.equal("Phone and amount are required");
-  });
-
-  it("should return error if amount is missing", async () => {
-    const response = await request(app)
-      .post("/api/mpesa/stkpush")
-      .send({ phone: "254700000000" });
-
-    expect(response.status).to.equal(400);
-    expect(response.body.message).to.equal("Phone and amount are required");
-  });
-
-  it("should return success if valid data is provided", async () => {
-    const mockResponse = {
-      CheckoutRequestID: "123456",
-      CustomerMessage: "Payment sent successfully"
-    };
-
-    // Mock initiateStkPush to return a mock response
-    sinon.stub(initiateStkPush, 'initiateStkPush').resolves(mockResponse);
-    
-    // Log the axios call to verify the Bearer token
-    sinon.stub(axios, 'post').callsFake((url, payload, { headers }) => {
-      // Verify the Authorization header contains "Bearer "
-      expect(headers.Authorization).to.match(/^Bearer /);  // Check if Authorization starts with "Bearer "
-      return Promise.resolve({ data: mockResponse });  // Return mock response for the API call
+    initiateStkPushStub = sinon.stub(mpesaService, "initiateStkPush").resolves({
+      success: true,
+      CheckoutRequestID: "abc123",
+      CustomerMessage: "STK Push sent successfully"
     });
-
-    const response = await request(app)
-      .post("/api/mpesa/stkpush")
-      .send({ phone: "254700000000", amount: 1000 });
-
-    expect(response.status).to.equal(200);
-    expect(response.body.success).to.equal(true);
-    expect(response.body.checkoutRequestID).to.equal("123456");
-    expect(response.body.message).to.equal("Payment sent successfully");
   });
 
+  // Restore the stub after each test
+  afterEach(() => {
+    initiateStkPushStub.restore();
+  });
+
+  // Test case for missing phone number
+  it("should return error if phone is missing", async () => {
+    const res = await request(app)
+      .post("/api/mpesa/stkpush")
+      .send({ amount: 1000 });
+
+    expect(res.status).to.equal(400);  // Expecting 400 as the phone is missing
+    expect(res.body.error).to.equal("Phone number is required");
+  });
+
+  // Test case for missing amount
+  it("should return error if amount is missing", async () => {
+    const res = await request(app)
+      .post("/api/mpesa/stkpush")
+      .send({ phone: "254708000000" });
+
+    expect(res.status).to.equal(400);  // Expecting 400 as the amount is missing
+    expect(res.body.error).to.equal("Amount is required");
+  });
+
+  // Test case for valid data
+  it("should return success if valid data is provided", async () => {
+    const res = await request(app)
+      .post("/api/mpesa/stkpush")
+      .send({ phone: "254708000000", amount: 1000 });
+
+    expect(res.status).to.equal(200);  // Expecting 200 for success
+    expect(res.body.success).to.equal(true);
+    expect(res.body.message).to.equal("STK Push sent successfully");
+  });
+
+  // Test case for MPESA service failure
   it("should return error if MPESA service fails", async () => {
-    // Simulate a failure in initiateStkPush
-    sinon.stub(initiateStkPush, 'initiateStkPush').rejects(new Error("MPESA API Error"));
+    // Simulate failure by making the stub reject
+    initiateStkPushStub.rejects(new Error("MPESA service failure"));
 
-    const response = await request(app)
+    const res = await request(app)
       .post("/api/mpesa/stkpush")
-      .send({ phone: "254700000000", amount: 1000 });
+      .send({ phone: "254708000000", amount: 1000 });
 
-    expect(response.status).to.equal(500);
-    expect(response.body.success).to.equal(false);
-    expect(response.body.message).to.equal("STK Push failed. Please try again.");
+    expect(res.status).to.equal(500);  // Expecting 500 for server error
+    expect(res.body.message).to.equal("STK Push failed. Please try again.");
   });
 
+  // Test case for logging errors on MPESA service failure
   it("should log error on MPESA service failure", async () => {
-    // Simulate failure
-    sinon.stub(initiateStkPush, 'initiateStkPush').rejects(new Error("MPESA API Error"));
+    // Simulate failure by making the stub reject
+    initiateStkPushStub.rejects(new Error("MPESA service failure"));
 
-    // Expect the error to be logged
-    const logSpy = sinon.spy(mpesaLogger, 'error');
+    // Spy on console.error to check if error is logged
+    const consoleErrorSpy = sinon.spy(console, "error");
 
     await request(app)
       .post("/api/mpesa/stkpush")
-      .send({ phone: "254700000000", amount: 1000 });
+      .send({ phone: "254708000000", amount: 1000 });
 
-    expect(logSpy.calledOnce).to.be.true;
-    expect(logSpy.args[0][0]).to.equal("❌ STK Push Error");
+    // Check if the error was logged
+    expect(consoleErrorSpy.calledWith("Error initiating STK Push:", sinon.match.instanceOf(Error))).to.equal(true);
+
+    consoleErrorSpy.restore();  // Restore the console spy
   });
 });

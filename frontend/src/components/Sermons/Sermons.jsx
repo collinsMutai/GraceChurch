@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
+import { Button, Modal, Container, Row, Col } from "react-bootstrap";  // Importing Bootstrap components
 import "./Sermons.css";
 
 const Sermons = () => {
@@ -82,102 +83,117 @@ const Sermons = () => {
   };
 
   return (
-    <div className="sermons-container">
-      <h2 className="sermons-heading">Previous Sermons</h2>
+    <Container>
+      <h2 className="sermons-heading text-center my-4">Previous Sermons</h2>
 
-      <div className="sermons-grid">
+      <Row>
         {sermons.map((s) => (
-          <div key={s._id} className="sermon-card">
-            {/* Video icon overlay */}
-            <div
-              className="video-icon"
-              onClick={() => setCurrentVideo(s)}
-              title="Play Video"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="40"
-                height="40"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="icon-tabler-video"
+          <Col key={s._id} sm={12} md={4} lg={3}>
+            <div className="sermon-card">
+              {/* Video icon overlay */}
+              <div
+                className="video-icon"
+                onClick={() => setCurrentVideo(s)}
+                title="Play Video"
               >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M15 10l4.553 -2.276a1 1 0 0 1 1.447 .894v6.764a1 1 0 0 1 -1.447 .894l-4.553 -2.276v-4z" />
-                <path d="M3 6m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z" />
-              </svg>
-            </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="icon-tabler-video"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M15 10l4.553 -2.276a1 1 0 0 1 1.447 .894v6.764a1 1 0 0 1 -1.447 .894l-4.553 -2.276v-4z" />
+                  <path d="M3 6m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z" />
+                </svg>
+              </div>
 
-            <img
-              loading="lazy"
-              src={s.thumbnail}
-              alt={s.title}
-              className="sermon-image"
-            />
-            <div className="sermon-info">
-              <h3 className="sermon-title">{s.title}</h3>
-              <p className="sermon-date">{formatDate(s.publishedAt)}</p>
-              <p className="sermon-source">Source: {s.source?.toUpperCase()}</p>
+              <img
+                loading="lazy"
+                src={s.thumbnail}
+                alt={s.title}
+                className="sermon-image img-fluid"
+              />
+              <div className="sermon-info">
+                <h3 className="sermon-title">{s.title}</h3>
+                <p className="sermon-date">{formatDate(s.publishedAt)}</p>
+                <p className="sermon-source">Source: {s.source?.toUpperCase()}</p>
+              </div>
             </div>
-          </div>
+          </Col>
         ))}
-      </div>
+      </Row>
 
       {sermons.length < total && (
-        <div className="sermons-load-more">
-          <button
+        <div className="text-center my-4">
+          <Button
             onClick={loadMore}
             disabled={loading}
-            className="load-more-btn"
+            variant="primary"
+            size="lg"
           >
             {loading ? "Loading..." : "Load More"}
-          </button>
+          </Button>
         </div>
       )}
 
       {!loading && sermons.length === 0 && (
-        <p className="no-sermons">No sermons found.</p>
+        <p className="text-center">No sermons found.</p>
       )}
 
       {/* 🎬 Video Modal */}
-      {currentVideo && (
-        <div className="video-modal" onClick={() => setCurrentVideo(null)}>
-          <div className="video-wrapper" onClick={(e) => e.stopPropagation()}>
-            {currentVideo.source === "youtube" && (
+      <Modal
+        show={!!currentVideo}
+        onHide={() => setCurrentVideo(null)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{currentVideo?.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {currentVideo?.source === "youtube" && (
+            <div className="embed-responsive embed-responsive-16by9">
               <iframe
-                width="100%"
-                height="400"
+                className="embed-responsive-item"
                 src={`https://www.youtube.com/embed/${currentVideo.videoId}?autoplay=1`}
                 title={`YouTube video: ${currentVideo.title}`}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
-            )}
-            {currentVideo.source === "facebook" && (
+            </div>
+          )}
+          {currentVideo?.source === "facebook" && (
+            <div className="embed-responsive embed-responsive-16by9">
               <iframe
+                className="embed-responsive-item"
                 src={`https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/${process.env.REACT_APP_FACEBOOK_PAGE_ID}/videos/${currentVideo.videoId}/&show_text=0&width=560`}
                 width="100%"
-                height="400"
+                height="315"
                 style={{ border: "none", overflow: "hidden" }}
                 scrolling="no"
                 frameBorder="0"
                 allowFullScreen
                 allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                 title={`Facebook video: ${currentVideo.title}`}
-              ></iframe>
-            )}
-            <button className="close-btn" onClick={() => setCurrentVideo(null)}>
-              ✖ Close
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+              />
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setCurrentVideo(null)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Container>
   );
 };
 

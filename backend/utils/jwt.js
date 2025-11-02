@@ -1,29 +1,43 @@
-// utils/jwt.js
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_secret_here"; // Replace with env variable
+const SECRET = process.env.JWT_SECRET || 'super_secret_guest_key';
 
-// Middleware to verify guest token
-function verifyGuestToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+// ✅ Create Guest JWT (expires in 10 mins)
+const createGuestToken = () => {
+  const payload = {
+    role: 'guest',
+    iat: Math.floor(Date.now() / 1000),
+  };
 
-  if (!token) {
-    return res.status(401).json({ success: false, message: "No token provided" });
+  return jwt.sign(payload, SECRET, { expiresIn: '10m' });
+};
+
+// ✅ Middleware to Verify Guest Token
+const verifyGuestToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Missing or invalid token' });
   }
+
+  const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // Attach payload to req.user
+    const decoded = jwt.verify(token, SECRET);
+
+    // ✅ Optional: only allow 'guest' role
+    if (decoded.role !== 'guest') {
+      return res.status(403).json({ message: 'Forbidden: Not a guest token' });
+    }
+
+    req.guest = decoded; // attach to request
     next();
   } catch (err) {
-    return res.status(403).json({ success: false, message: "Invalid or expired token" });
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
-}
+};
 
-// Function to generate JWT (optional)
-function generateToken(payload, expiresIn = "1h") {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
-}
-
-module.exports = { verifyGuestToken, generateToken };
+module.exports = {
+  createGuestToken,
+  verifyGuestToken,
+};

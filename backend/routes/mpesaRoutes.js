@@ -1,34 +1,28 @@
+// mpesaRoutes.js
 const express = require("express");
-const rateLimit = require("express-rate-limit");
-const { body, param, validationResult } = require("express-validator");
 const router = express.Router();
-const { stkPush, callback, status } = require("../controllers/mpesaController");
-const { verifyGuestToken } = require("../utils/jwt");
+const rateLimit = require("express-rate-limit");
+const { verifyGuestToken } = require("../utils/jwt"); // ✅ import middleware
 
-// Rate limiter
-const stkPushLimiter = rateLimit({ windowMs: 10*60*1000, max: 3, message: "Too many STK push requests" });
+const { stkPush, callback, status } = require("../controllers/mpesaController"); // import controller
 
-// Validation error handler
-const handleValidationErrors = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
-  next();
-};
+// === STK Push Rate Limiter ===
+const stkPushLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: {
+    success: false,
+    message: "Too many STK push requests. Please try again later.",
+  },
+});
 
-// Routes
-router.post("/stkpush", verifyGuestToken, stkPushLimiter,
-  body("phone").trim().matches(/^(\+?254|0)?(1|7)\d{8}$/),
-  body("amount").isInt({ min:10, max:70000 }),
-  handleValidationErrors,
-  stkPush
-);
+// === STK Push Route (Protected with JWT and Rate Limiter) ===
+router.post("/stkpush", verifyGuestToken, stkPushLimiter, stkPush);
 
+// === M-PESA Callback Route (No Auth Needed) ===
 router.post("/callback", callback);
 
-router.get("/status/:checkoutId", verifyGuestToken,
-  param("checkoutId").trim().isLength({ min: 10 }),
-  handleValidationErrors,
-  status
-);
+// === GET Payment Status Route (Optional: protect with verifyGuestToken) ===
+router.get("/status/:checkoutId", verifyGuestToken, status);
 
 module.exports = router;
