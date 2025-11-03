@@ -9,6 +9,7 @@ const Sermons = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(null);
+  const [liveVideoUrl, setLiveVideoUrl] = useState(null); // State for live video URL
   const limit = 9;
 
   const API_URL = useMemo(() => process.env.REACT_APP_API_URL || "", []);
@@ -32,6 +33,21 @@ const Sermons = () => {
     return `${day}${suffix} ${month} ${year}`;
   };
 
+  // Fetch live video URL (Modify with actual API endpoint for live video)
+  const fetchLiveVideo = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/live-video`);
+      if (res.data?.liveVideoUrl) {
+        setLiveVideoUrl(res.data.liveVideoUrl);  // Set live video URL
+      } else {
+        setLiveVideoUrl(null); // If no live video, set to null
+      }
+    } catch (err) {
+      console.error("Error fetching live video:", err);
+      setLiveVideoUrl(null);  // Set to null if there's an error
+    }
+  }, [API_URL]);
+
   const fetchSermons = useCallback(
     async (pageNum = 1) => {
       const cacheKey = `sermons_page_${pageNum}`;
@@ -53,6 +69,7 @@ const Sermons = () => {
           { signal: controller.signal }
         );
         const data = res.data;
+
         setSermons((prev) =>
           pageNum === 1 ? data.sermons : [...prev, ...data.sermons]
         );
@@ -74,7 +91,8 @@ const Sermons = () => {
 
   useEffect(() => {
     fetchSermons(1);
-  }, [fetchSermons]);
+    fetchLiveVideo();  // Fetch live video URL when the component loads
+  }, [fetchSermons, fetchLiveVideo]);
 
   const loadMore = () => {
     const nextPage = page + 1;
@@ -84,6 +102,27 @@ const Sermons = () => {
 
   return (
     <Container>
+      {/* Live Video Player */}
+      {liveVideoUrl ? (
+        <div className="live-video-container">
+          <h2 className="text-center my-4">Live Video Stream</h2>
+          <div className="embed-responsive embed-responsive-16by9">
+            <iframe
+              className="embed-responsive-item"
+              src={liveVideoUrl}
+              title="Live Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="no-live-feed">
+          <h3 className="text-center my-4">No Live Feed Available</h3>
+        </div>
+      )}
+
       <h2 className="sermons-heading text-center my-4">Previous Sermons</h2>
 
       <Row>
@@ -121,8 +160,7 @@ const Sermons = () => {
                 className="sermon-image img-fluid"
               />
               <div className="sermon-info">
-                <h3 className="sermon-title">{s.title}</h3>
-                <p className="sermon-date">{formatDate(s.publishedAt)}</p>
+                <h3 className="sermon-title">{formatDate(s.publishedAt)}</h3>
                 <p className="sermon-source">Source: {s.source?.toUpperCase()}</p>
               </div>
             </div>
@@ -133,9 +171,10 @@ const Sermons = () => {
       {sermons.length < total && (
         <div className="text-center my-4">
           <Button
+          className="load-more-btn"
             onClick={loadMore}
             disabled={loading}
-            variant="primary"
+            variant=""
             size="lg"
           >
             {loading ? "Loading..." : "Load More"}
@@ -181,7 +220,7 @@ const Sermons = () => {
                 scrolling="no"
                 frameBorder="0"
                 allowFullScreen
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-web-share"
                 title={`Facebook video: ${currentVideo.title}`}
               />
             </div>

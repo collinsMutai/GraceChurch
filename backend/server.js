@@ -15,7 +15,7 @@ const { serverLogger, liveLogger } = require("./utils/logger");
 
 const app = express();
 
-// ==== Middleware ====
+// ==== Middleware ==== 
 app.use(cors());
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.json());
@@ -64,44 +64,109 @@ mongoose
 let ytIsLive = false, fbIsLive = false;
 let prevYtStatus = null, prevFbStatus = null;
 
+// Retry logic for API requests with exponential backoff
+const retryApiRequest = async (url, params, maxRetries = 3, delay = 1000) => {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      // Try the API request
+      const res = await axios.get(url, { params });
+      return res.data; // Return the response data if successful
+    } catch (err) {
+      attempt += 1;
+      if (attempt < maxRetries) {
+        // Log the retry attempt
+        if (shouldLog("warn")) liveLogger.warn(`🔄 Retrying... Attempt ${attempt}`);
+        await new Promise((resolve) => setTimeout(resolve, delay * attempt)); // Exponential backoff
+      } else {
+        // Log the final failure after max retries
+        if (shouldLog("warn")) liveLogger.error("❌ API request failed after retries", { error: err.stack || err.message });
+        throw err; // Throw error after exceeding retries
+      }
+    }
+  }
+};
+
+// Function to check YouTube live status with retries and DB fallback
 const checkYouTubeLive = async () => {
+  const params = {
+    part: "snippet",
+    channelId: process.env.YOUTUBE_CHANNEL_ID,
+    eventType: "live",
+    type: "video",
+    key: process.env.YOUTUBE_API_KEY,
+  };
+
   try {
-    const res = await axios.get("https://www.googleapis.com/youtube/v3/search", {
-      params: {
-        part: "snippet",
-        channelId: process.env.YOUTUBE_CHANNEL_ID,
-        eventType: "live",
-        type: "video",
-        key: process.env.YOUTUBE_API_KEY,
-      },
-    });
-    ytIsLive = res.data.items?.length > 0;
+    // Try to fetch the live status from the YouTube API
+    const data = await retryApiRequest(
+      "https://www.googleapis.com/youtube/v3/search", 
+      params
+    );
+
+    ytIsLive = data.items?.length > 0;
     if (ytIsLive !== prevYtStatus) {
       prevYtStatus = ytIsLive;
       if (shouldLog("info")) liveLogger.info(`🎥 YouTube is now ${ytIsLive ? "LIVE" : "offline"}`);
     }
   } catch (err) {
-    if (shouldLog("warn")) liveLogger.error("❌ YouTube Check Error", { error: err.stack || err.message });
+    // Fallback to database if YouTube API fails
+    try {
+      const lastYtSermon = await Sermon.findOne({ source: 'youtube' }).sort({ publishedAt: -1 }).lean();
+      if (lastYtSermon) {
+        ytIsLive = true;
+        if (shouldLog("info")) liveLogger.info(`⚠️ Fallback to DB: YouTube live status assumed as LIVE. Last sermon: ${lastYtSermon.title}`);
+      } else {
+        ytIsLive = false;
+        if (shouldLog("info")) liveLogger.info("⚠️ Fallback to DB: No YouTube sermons found in DB. Marking as offline.");
+      }
+    } catch (dbError) {
+      if (shouldLog("error")) liveLogger.error("❌ DB fallback failed", { error: dbError.stack || dbError.message });
+      ytIsLive = false; // Mark as offline if DB fails
+    }
   }
 };
 
+// Function to check Facebook live status with retries and DB fallback
 const checkFacebookLive = async () => {
+  const params = {
+    status: "LIVE_NOW",
+    access_token: process.env.FACEBOOK_ACCESS_TOKEN,
+  };
+
   try {
-    const res = await axios.get(
-      `https://graph.facebook.com/v17.0/${process.env.FACEBOOK_PAGE_ID}/live_videos`,
-      { params: { status: "LIVE_NOW", access_token: process.env.FACEBOOK_ACCESS_TOKEN } }
+    // Try to fetch the live status from the Facebook API
+    const data = await retryApiRequest(
+      `https://graph.facebook.com/v17.0/${process.env.FACEBOOK_PAGE_ID}/live_videos`, 
+      params
     );
-    fbIsLive = res.data.data?.length > 0;
+
+     console.log('sermons', result);
+    
+    fbIsLive = data.data?.length > 0;
     if (fbIsLive !== prevFbStatus) {
       prevFbStatus = fbIsLive;
       if (shouldLog("info")) liveLogger.info(`🎬 Facebook is now ${fbIsLive ? "LIVE" : "offline"}`);
     }
   } catch (err) {
-    if (shouldLog("warn")) liveLogger.error("❌ Facebook Check Error", { error: err.stack || err.message });
+    // Fallback to database if Facebook API fails
+    try {
+      const lastFbSermon = await Sermon.findOne({ source: 'facebook' }).sort({ publishedAt: -1 }).lean();
+      if (lastFbSermon) {
+        fbIsLive = true;
+        if (shouldLog("info")) liveLogger.info(`⚠️ Fallback to DB: Facebook live status assumed as LIVE. Last sermon: ${lastFbSermon.title}`);
+      } else {
+        fbIsLive = false;
+        if (shouldLog("info")) liveLogger.info("⚠️ Fallback to DB: No Facebook sermons found in DB. Marking as offline.");
+      }
+    } catch (dbError) {
+      if (shouldLog("error")) liveLogger.error("❌ DB fallback failed", { error: dbError.stack || dbError.message });
+      fbIsLive = false; // Mark as offline if DB fails
+    }
   }
 };
 
-// run every 2 minutes
+// Run every 2 minutes
 setInterval(() => {
   checkYouTubeLive();
   checkFacebookLive();
@@ -133,7 +198,6 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 // ==== Start Server conditionally ====
-// Only start the server if we're not in a test environment
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {

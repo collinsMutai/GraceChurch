@@ -1,3 +1,4 @@
+const axios = require("axios");
 const Sermon = require("../models/Sermon");
 const NodeCache = require("node-cache");
 const { fetchYouTubeSermons } = require("../utils/youtube");
@@ -6,11 +7,39 @@ const { fetchFacebookSermons } = require("../utils/facebook");
 // In-memory cache (TTL: 5 min)
 const sermonCache = new NodeCache({ stdTTL: 300, checkperiod: 320 });
 
+const { FACEBOOK_PAGE_ID, FACEBOOK_ACCESS_TOKEN } = process.env;
+
 /**
- * Get sermons (with pagination)
- * - Adds in-memory caching to prevent redundant DB queries
- * - Uses lean() for faster read performance
- * - Uses projection to only fetch required fields
+ * Fetch the current live video stream from Facebook
+ */
+const fetchLiveVideo = async () => {
+  try {
+    const url = `https://graph.facebook.com/v12.0/${FACEBOOK_PAGE_ID}/live_videos`;
+    const response = await axios.get(url, {
+      params: {
+        access_token: FACEBOOK_ACCESS_TOKEN,
+        fields: 'id, status, permalink_url',
+      },
+    });
+
+    const liveVideo = response.data.data.find((video) => video.status === "LIVE");
+
+    if (liveVideo) {
+      return {
+        liveVideoUrl: `https://www.facebook.com/${FACEBOOK_PAGE_ID}/videos/${liveVideo.id}/`,
+        status: 'LIVE',
+      };
+    } else {
+      return { message: 'No live video is currently streaming.', status: 'NOT_LIVE' };
+    }
+  } catch (err) {
+    console.error('Error fetching live video:', err.message);
+    return { error: 'Failed to fetch live video' };
+  }
+};
+
+/**
+ * Get sermons (with pagination) and optional live video feed
  */
 exports.getSermons = async (req, res) => {
   try {
@@ -32,11 +61,14 @@ exports.getSermons = async (req, res) => {
         .sort({ publishedAt: -1 })
         .skip(skip)
         .limit(limit)
-        .lean(), // returns plain JS objects, much faster than full mongoose docs
-      Sermon.estimatedDocumentCount(), // faster than countDocuments() when no filters
+        .lean(),
+      Sermon.estimatedDocumentCount(),
     ]);
 
-    const result = { sermons, total };
+    // Fetch live video (optional)
+    const liveVideo = await fetchLiveVideo();
+
+    const result = { sermons, total, liveVideo };
 
     // ✅ 3. Cache result for quick reuse
     sermonCache.set(cacheKey, result);
@@ -49,8 +81,8 @@ exports.getSermons = async (req, res) => {
 };
 
 /**
- * Manual refresh (admin trigger)
- * - Parallel fetching with Promise.allSettled (doesn’t fail if one source fails)
+ * Manual refresh (admin trigger) for refreshing sermons from external sources
+ * - Fetches sermons from YouTube and Facebook (via background fetch functions)
  * - Clears cache after refresh to ensure fresh data
  */
 exports.refreshSermons = async (req, res) => {
@@ -60,7 +92,7 @@ exports.refreshSermons = async (req, res) => {
       fetchFacebookSermons(),
     ]);
 
-    // Clear cache after refresh
+    // Clear cache after refresh to ensure fresh data
     sermonCache.flushAll();
 
     const status = results.map((r) => r.status);
