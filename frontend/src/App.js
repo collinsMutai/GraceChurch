@@ -10,6 +10,7 @@ import Footer from "./components/Footer/Footer";
 import Navbar from "./components/Navbar/Navbar"; 
 import "./App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import ContactForm from "./components/ContactForm/ContactForm";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/donation" element={<Donation />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
+      <ContactForm />
       <Footer />
     </>
   );

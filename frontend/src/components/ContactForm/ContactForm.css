@@ -1,0 +1,136 @@
+/* ContactForm Component Styling */
+.contact-form-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 3rem;
+  padding: 2.5rem 9.25rem;
+  flex-wrap: wrap;
+}
+
+.contact-info {
+  flex: 1;
+  max-width: 400px;
+}
+
+.contact-info h2,
+.contact-info h3 {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.contact-info p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.social-links {
+  margin-top: 1rem;
+}
+
+.social-links a {
+  display: block;
+  font-size: 1.1rem;
+  color: #1a73e8;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+}
+
+.social-links a:hover {
+  text-decoration: underline;
+}
+
+.contact-form {
+  flex: 1;
+  max-width: 500px;
+}
+
+.contact-form h2 {
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.contact-form p.contact-text {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+.contact-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-field label {
+  font-size: 1rem;
+  color: #444;
+}
+
+.form-field input,
+.form-field textarea {
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.form-field textarea {
+  min-height: 120px;
+}
+
+button {
+  width: 140px;
+  padding: 0.6rem 1.2rem; /* Reduced padding for a smaller button */
+  background-color: #ff5733; /* Changed background color */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-transform: uppercase;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #e04f2d; /* Darker shade for hover effect */
+}
+
+/* === Talk To Us Section === */
+.talk-to-us {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.talk-to-us .icon {
+  margin-right: 10px;
+  stroke: #ff5733; /* Change the stroke color to the specified color */
+  width: 46px; /* Increase size here */
+  height: 46px; /* Increase size here */
+}
+
+.talk-to-us span {
+  font-size: 1.3rem;
+  font-family: "Satisfy", cursive;
+  font-weight: 400;
+  color: #333;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .contact-form-container {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2.5rem 1.1rem;
+  }
+
+  .contact-info {
+    max-width: 100%;
+  }
+
+  .contact-form {
+    max-width: 100%;
+  }
+}
