@@ -1,55 +1,145 @@
-// src/components/ImageSlider.js
 import React, { useState, useEffect } from "react";
-import "./ImageSlider.css"; // Importing CSS styles
-import slide1 from "../../images/slider1.jpeg"; // Image 1
-import slide2 from "../../images/slider2.jpeg"; // Image 2
-// import slide3 from "../../images/slider3.jpeg"; // Uncomment if you have a 3rd image
-// import slide4 from "../../images/slider4.jpeg"; // Uncomment if you have a 4th image
+import "./ImageSlider.css";
+import slide1 from "../../images/slider1.jpeg";
+import slide2 from "../../images/slider2.jpeg";
 
 const ImageSlider = () => {
-  // Array of images to display in the slider
-  const images = [slide1, slide2]; // Add more images if needed
+  const images = [
+    {
+      src: slide1,
+      alt: "Deliverance Church Litein - Sunday Service Worship",
+      title: "Welcome to Deliverance Church Litein",
+      subtitle: "Building Faith. Transforming Lives. Serving the Community.",
+      description:
+        "Discover a vibrant community of believers at Deliverance Church Litein. We are passionate about worship, discipleship, and outreach—empowering individuals to live out their God-given purpose.",
+      ctaButtons: [
+        { text: "Learn More", link: "/about" },
+        { text: "Sermons", link: "/sermons" },
+      ],
+    },
+    {
+      src: slide2,
+      alt: "Deliverance Church Litein - Community Outreach and Fellowship",
+      title: "Connect Through Fellowship",
+      subtitle: "Faith in Action. Hope Restored. Love Shared.",
+      description:
+        "From outreach to discipleship, our ministries impact lives daily. Join us and be part of a church that lives out the Gospel through service and compassion.",
+      ctaButtons: [
+        { text: "Get Involved", link: "/ministries" },
+        { text: "Sermons", link: "/sermons" },
+      ],
+    },
+  ];
 
-  const [currentIndex, setCurrentIndex] = useState(0); // Initial slide index
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [fade, setFade] = useState(true);
 
-  // Function to go to the next slide
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length); // Cycle through images
+    setFade(false);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+      setFade(true);
+    }, 500);
   };
 
-  // Function to go to the previous slide
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1 // Loop back to the last image
-    );
+    setFade(false);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+      setFade(true);
+    }, 500);
   };
 
-  // Auto slide every 5 seconds
   useEffect(() => {
-    const interval = setInterval(nextSlide, 5000);
-    return () => clearInterval(interval); // Cleanup the interval on component unmount
+    const interval = setInterval(nextSlide, 6000);
+    return () => clearInterval(interval);
   }, []);
 
+  const currentImage = images[currentIndex];
+
   return (
-    <header className="image-slider">
-      {/* Image Wrapper */}
+    <header
+      className="image-slider"
+      role="banner"
+      aria-label="Deliverance Church Litein image slider showcasing worship, community, and faith activities"
+    >
+      {/* Image + Overlay */}
       <div className="image-slider-wrapper">
-        <img src={images[currentIndex]} alt={`Slide ${currentIndex + 1}`} />
+        <img
+          src={currentImage.src}
+          alt={currentImage.alt}
+          loading="lazy"
+          className={`slider-image ${fade ? "fade-in" : "fade-out"}`}
+        />
+        <div className="image-overlay"></div>
       </div>
 
-      {/* Header Content (Text and CTA Button) */}
-      <div className="header-content">
-        <h1>Welcome to Our Website</h1>
-        <p>Your journey starts here. Explore our services!</p>
-        <button className="cta-button">Learn More</button>
+      {/* Header Content */}
+      <div className={`header-content ${fade ? "fade-in" : "fade-out"}`}>
+        <h1>{currentImage.title}</h1>
+        <h2>{currentImage.subtitle}</h2>
+        <p>{currentImage.description}</p>
+        <div className="cta-buttons">
+          {currentImage.ctaButtons.map((btn, idx) => (
+            <a
+              key={idx}
+              href={btn.link}
+              className={`cta-button ${
+                btn.link === "/sermons" ? "transparent sermons-btn" : ""
+              } ${btn.text === "Learn More" ? "learn-more-btn" : ""}`}
+              aria-label={btn.text}
+            >
+              {btn.text}
+              {btn.link === "/sermons" && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-bible"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M19 4v16h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12z" />
+                  <path d="M19 16h-12a2 2 0 0 0 -2 2" />
+                  <path d="M12 7v6" />
+                  <path d="M10 9h4" />
+                </svg>
+              )}
+              {btn.text === "Learn More" && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M5 12l14 0" />
+                  <path d="M15 16l4 -4" />
+                  <path d="M15 8l4 4" />
+                </svg>
+              )}
+            </a>
+          ))}
+        </div>
       </div>
 
-      {/* Previous and Next Buttons */}
-      <button className="prev" onClick={prevSlide}>
-        &#10094; {/* Left Arrow */}
+      {/* Navigation Buttons */}
+      <button className="prev" onClick={prevSlide} aria-label="Previous Slide">
+        &#10094;
       </button>
-      <button className="next" onClick={nextSlide}>
-        &#10095; {/* Right Arrow */}
+      <button className="next" onClick={nextSlide} aria-label="Next Slide">
+        &#10095;
       </button>
     </header>
   );

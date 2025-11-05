@@ -1,4 +1,47 @@
-/* === GENERAL NAV STYLES === */
+/* === TOP INFO BAR === */
+.top-info-bar {
+  background-color: #222;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem 9.25rem;
+  font-size: 0.9rem;
+}
+
+.top-info-bar .info-item.service-time {
+  margin-left: auto;
+  font-weight: 600;
+  color: #fff;
+}
+
+.top-info-bar .info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.top-info-bar .info-item:hover {
+  color: #e04e2f;
+}
+
+.top-info-bar .info-item a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.top-info-bar .info-item svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  transition: stroke 0.3s ease;
+}
+
+/* === GENERAL NAVBAR STYLES === */
 .navbar {
   display: flex;
   align-items: center;
@@ -8,9 +51,10 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 1000;
+  transition: background-color 0.3s ease;
 }
 
-/* ✅ Remove bullets and reset padding for UL */
+/* Remove bullets and reset padding for UL */
 .nav-links,
 .mobile-menu {
   list-style: none;
@@ -18,13 +62,13 @@
   padding: 0;
 }
 
-/* ✅ Space out nav items horizontally */
+/* Space out nav items horizontally */
 .nav-links li {
   display: inline-block;
   margin: 0 1rem;
 }
 
-/* ✅ Style nav links */
+/* Style nav links */
 .nav-links a {
   text-decoration: none;
   color: #333;
@@ -34,17 +78,15 @@
   border-bottom: 2px solid transparent;
 }
 
-/* ✅ Hover color */
 .nav-links a:hover {
-  color: var(--text-red-color);
+  color: #e04e2f;
 }
 
-/* ✅ Active link (desktop & mobile) */
 .nav-links a.active-link,
 .mobile-menu a.active-link {
-  color: var(--text-red-color);
+  color: #ff5733;
   font-weight: 600;
-  border-bottom: 2px solid var(--text-red-color);
+  border-bottom: 2px solid #ff5733;
 }
 
 /* === LOGO === */
@@ -91,11 +133,13 @@
   transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-/* ✅ Mobile active link - highlight background */
 .mobile-menu a.active-link {
-  color: var(--text-red-color);
-  background-color: rgba(209, 79, 66, 0.1);
-  border-radius: 4px;
+  color: #ff5733;
+}
+
+.mobile-menu a:hover {
+  color: #e04e2f;
+  background-color: rgba(224, 78, 47, 0.1);
 }
 
 /* === HAMBURGER BUTTON === */
@@ -111,18 +155,25 @@
 .hamburger span {
   width: 25px;
   height: 3px;
-  background: #333;
+  background: #333 !important;
   border-radius: 2px;
   transition: background 0.3s ease;
 }
 
-/* ✅ Hamburger active color toggle */
+.hamburger span.open {
+  background: #ff5733 !important;
+}
+
 .hamburger.open span {
-  background: var(--text-red-color);
+  background: #ff5733 !important;
 }
 
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
+  .top-info-bar {
+    display: none;
+  }
+
   .navbar {
     padding: 1rem 2rem !important;
   }
@@ -137,5 +188,176 @@
 
   .site-title {
     font-size: 1rem;
+  }
+
+  .navbar.open,
+  ul.open {
+    background-color: #fff !important;
+  }
+
+  .mobile-menu a {
+    color: #222 !important;
+  }
+}
+
+/* === GIVE BUTTON === */
+.mobile-menu .give-button {
+  padding: 0.5rem 1rem;
+  background-color: #ff5733;
+  color: #fff !important;
+  border-radius: 4px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.nav-button .give-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #ff5733;
+  color: #ffffff;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+}
+
+.nav-button .give-button:hover {
+  background-color: #e04e2f;
+}
+
+/* === MOBILE/DESKTOP VISIBILITY === */
+.desktop-only {
+  display: flex;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* MOBILE MENU & HAMBURGER */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: flex;
+  }
+
+  .navbar {
+    padding: 1.5rem 1.5rem;
+    position: relative;
+    z-index: 1100;
+  }
+
+  /* NAVBAR CLOSED (Menu closed) */
+  .navbar.closed {
+    background-color: #ffffff;
+  }
+
+  .navbar.closed .nav-logo a {
+    color: #000000;
+  }
+
+  .navbar.closed .hamburger span {
+    background-color: #000000;
+  }
+
+  /* NAVBAR OPEN (Menu open) */
+  .navbar.open {
+    background-color: #1c110b;
+  }
+
+  .navbar.open .nav-logo a {
+    color: #ffffff;
+  }
+
+  .navbar.open .hamburger span {
+    background-color: #ffffff;
+  }
+
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 25px;
+    height: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1101;
+  }
+
+  .hamburger span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .hamburger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .hamburger.open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  /* Mobile menu dropdown */
+  .mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #1c110b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    padding-top: 6rem;
+  }
+
+  .mobile-menu.open {
+    transform: translateY(0);
+  }
+
+  .mobile-menu a {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0.8rem 0;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .mobile-menu a:hover,
+  .mobile-menu a.active-link {
+    color: #d1b899;
+  }
+
+  .mobile-menu .give-button {
+    background-color: #ff5733 !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    color: white;
+  }
+
+  .mobile-menu .give-button:hover {
+    background-color: #e04e2f;
   }
 }

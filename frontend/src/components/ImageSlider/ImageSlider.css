@@ -1,91 +1,289 @@
-/* src/components/ImageSlider.css */
+/* --- Base Slider Container --- */
 .image-slider {
   position: relative;
   width: 100%;
-  height: 100vh; /* Full height of the viewport */
+  height: 100vh;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
+  color: #fff;
+  text-align: center;
+  background-color: #000; /* Solid black background */
 }
 
+/* --- Image Wrapper --- */
 .image-slider-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1; /* Ensures images are behind the overlay */
+}
+
+/* --- Slider Image --- */
+.slider-image {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  transition: opacity 1s ease-in-out;
+  filter: brightness(0.9);
+  opacity: 0; /* Start invisible */
 }
 
-.image-slider-wrapper img {
+/* Fade-in and fade-out behavior */
+.slider-image.fade-in {
+  opacity: 1; /* Fully visible */
+}
+
+.slider-image.fade-out {
+  opacity: 0; /* Fully invisible */
+  transition: opacity 0.5s ease-out; /* Smooth fading out */
+}
+
+/* --- Dark Overlay --- */
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  opacity: 0.8; /* Slight transparency to make text more readable */
+  background: rgba(0, 0, 0, 0.55); /* Slightly transparent overlay */
+  z-index: 2; /* Overlay should be on top of images */
+  pointer-events: none; /* Prevent interactions with the overlay */
 }
 
+/* --- Header Content --- */
 .header-content {
-  position: absolute;
+  position: relative;
+  z-index: 3;
+  max-width: 90%;
+  padding: 20px;
   text-align: center;
-  z-index: 10;
-  padding: 20px; /* Add padding to ensure the text doesn't touch the edges */
-  max-width: 90%; /* Ensure text doesn't stretch too wide */
+  opacity: 1;
+  transition: opacity 1s ease-in-out;
+}
+
+.header-content.fade-in {
+  opacity: 1; /* Make content visible when fading in */
+}
+
+.header-content.fade-out {
+  opacity: 0; /* Hide content when fading out */
 }
 
 .header-content h1 {
-  font-size: 50px;
+  font-size: clamp(2rem, 5vw, 3.5rem);
   margin-bottom: 20px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-weight: 700;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.header-content h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 500;
+  margin-bottom: 15px;
+  color: #ffcc99;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .header-content p {
-  font-size: 20px;
-  margin-bottom: 30px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin-bottom: 35px;
+  line-height: 1.6;
+  color: #f5f5f5;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* --- CTA Buttons --- */
+.cta-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .cta-button {
-  padding: 12px 30px;
-  font-size: 18px;
-  background-color: #FF5733;
-  color: white;
+  display: inline-block;
+  padding: 14px 36px;
+  font-size: 1rem;
+  background-color: #ff5733;
+  color: #fff;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  border-radius: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  white-space: nowrap; /* Prevent text from wrapping */
+  width: auto; /* Ensure width is auto by default */
 }
 
-.cta-button:hover {
-  background-color: #C74329;
+/* Transparent CTA Button (for Sermons) */
+.cta-button.transparent {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
 }
 
-button {
- 
+/* --- Learn More Button Specific --- */
+.learn-more-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 36px; /* Base padding for text */
+  width: auto; /* Ensure consistent width */
+  transition: padding 0.3s ease; /* Transition to adjust padding */
+}
+
+/* Hide the icon initially */
+.learn-more-btn svg {
+  opacity: 0;
+  margin-left: 0; /* No space between icon and text initially */
+  transition: opacity 0.3s ease, margin-left 0.3s ease;
+  fill: #fff;  /* Make sure the SVG icon is white */
+}
+
+/* Show the icon on hover */
+.learn-more-btn:hover svg {
+  opacity: 1;
+  margin-left: 12px;  /* Add some space between the text and icon */
+}
+
+/* Adjust padding on hover to make room for the icon */
+.learn-more-btn:hover {
+  padding-right: 56px; /* Add extra padding on the right when hovering */
+}
+
+/* On hover, retain the default background color, only show the icon */
+.learn-more-btn:hover {
+  background-color: #ff5733; /* Ensure the background stays solid */
+  transform: scale(1.05);
+}
+
+/* --- Sermons Button Specific --- */
+.sermons-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 36px; /* Base padding for text */
+  width: auto; /* Ensure consistent width */
+  transition: padding 0.3s ease; /* Transition to adjust padding */
+}
+
+/* Hide the icon initially */
+.sermons-btn svg {
+  opacity: 0;
+  margin-left: 0; /* No space between icon and text initially */
+  transition: opacity 0.3s ease, margin-left 0.3s ease; /* Added margin transition */
+}
+
+/* Show the icon on hover */
+.sermons-btn:hover svg {
+  opacity: 1;
+  margin-left: 12px;  /* Add some space between the text and icon */
+}
+
+/* Adjust padding on hover to make room for the icon */
+.sermons-btn:hover {
+  padding-right: 56px; /* Add extra padding on the right when hovering */
+}
+
+/* Default state: Remove extra right padding */
+.sermons-btn {
+  padding-right: 36px; /* Match the left padding (no extra padding) */
+}
+
+/* On hover, retain the default background color, only show the icon */
+.sermons-btn:hover {
+  transform: scale(1.05);
+}
+
+/* --- Navigation Buttons --- */
+button.prev,
+button.next {
+  position: absolute;
+  top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  font-size: 30px;
+  background-color: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 32px;
   border: none;
   cursor: pointer;
-  padding: 10px;
-  z-index: 15; /* Ensure buttons are on top of the image but under the text */
+  padding: 12px;
+  z-index: 4;
   border-radius: 50%;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(3px);
 }
 
-button:hover {
+button.prev:hover,
+button.next:hover {
   background-color: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .prev {
-     position: absolute;
-  top: 50%;
-  left: 20px; /* Adjust left position to avoid overlap */
+  left: 20px;
 }
 
 .next {
-     position: absolute;
-  top: 50%;
-  right: 20px; /* Adjust right position to avoid overlap */
+  right: 20px;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .header-content h1 {
+    font-size: 2rem;
+  }
+
+  .header-content h2 {
+    font-size: 1.2rem;
+  }
+
+  .header-content p {
+    font-size: 1rem;
+  }
+
+  .cta-button {
+    font-size: 1rem;
+    padding: 10px 24px;
+  }
+
+  button.prev,
+  button.next {
+    display: none; /* Hide nav arrows on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .header-content h2 {
+    font-size: 1.1rem;
+  }
+
+  .header-content p {
+    font-size: 0.95rem;
+  }
+
+  .cta-button {
+    font-size: 0.95rem;
+    padding: 8px 20px;
+  }
 }
