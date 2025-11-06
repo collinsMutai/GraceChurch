@@ -1,0 +1,59 @@
+/* Main gallery wrapper */
+.my-masonry-grid {
+  display: flex;
+  margin-left: -16px; /* gutter size offset */
+  width: auto;
+  padding: 2.5rem 9.25rem;
+  box-sizing: border-box;
+}
+
+.my-masonry-grid_column {
+  padding-left: 16px; /* gutter size */
+  background-clip: padding-box;
+}
+
+.gallery-item {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  transition: transform 0.3s ease;
+}
+
+/* Make images scale naturally according to their aspect ratio */
+.gallery-item img {
+  width: 100%;
+  height: auto; /* variable height */
+  display: block;
+  object-fit: cover; /* ensures image fills width without stretching */
+}
+
+.gallery-item:hover {
+  transform: scale(1.03);
+}
+
+.loader {
+  text-align: center;
+  padding: 1rem;
+  font-size: 1.2rem;
+  color: #555;
+}
+
+/* Responsive padding */
+@media (max-width: 1200px) {
+  .my-masonry-grid {
+    padding: 2rem 5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .my-masonry-grid {
+    padding: 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-masonry-grid {
+    padding: 1rem 1rem;
+  }
+}
