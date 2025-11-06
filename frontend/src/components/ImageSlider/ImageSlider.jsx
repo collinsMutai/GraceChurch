@@ -25,7 +25,7 @@ const ImageSlider = () => {
       description:
         "From outreach to discipleship, our ministries impact lives daily. Join us and be part of a church that lives out the Gospel through service and compassion.",
       ctaButtons: [
-        { text: "Get Involved", link: "/ministries" },
+        { text: "Get Involved", link: "/contact" },
         { text: "Sermons", link: "/sermons" },
       ],
     },
