@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./components/pages/Home";
-import About from "./components/pages/About";
 import Sermons from "./components/Sermons/Sermons";
 import Gallery from "./components/Gallery/Gallery";
 import Donation from "./components/pages/Donation";
@@ -10,6 +9,7 @@ import Navbar from "./components/Navbar/Navbar";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ContactForm from "./components/ContactForm/ContactForm";
+import AboutPage from "./components/pages/About";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/sermons" element={<Sermons />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/donation" element={<Donation />} />

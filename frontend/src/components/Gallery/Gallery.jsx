@@ -12,6 +12,8 @@ import image6 from "../../images/img6.jpeg";
 import image7 from "../../images/img7.jpeg";
 import image8 from "../../images/img8.jpeg";
 import image9 from "../../images/img9.jpeg";
+import HeaderImage from "../../images/slider1.jpeg";
+import Header from "../Header/Header";
 
 const allImages = [
   image1,
@@ -28,6 +30,10 @@ const allImages = [
 const IMAGES_PER_LOAD = 3;
 
 const Gallery = () => {
+  const breadcrumbs = [
+    { text: "Home", link: "/" },
+    { text: "Gallery", link: "/gallery" },
+  ];
   const [images, setImages] = useState(allImages.slice(0, IMAGES_PER_LOAD));
   const [page, setPage] = useState(1);
 
@@ -46,24 +52,32 @@ const Gallery = () => {
   };
 
   return (
-    <InfiniteScroll
-      dataLength={images.length}
-      next={fetchMoreImages}
-      hasMore={images.length < allImages.length} // stops when all images loaded
-      loader={<div className="loader">Loading...</div>}
-    >
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="my-masonry-grid"
-        columnClassName="my-masonry-grid_column"
+    <>
+      <Header
+        title="Gallery"
+        imageUrl={HeaderImage} // Passing the background image
+        breadcrumbs={breadcrumbs} // Passing breadcrumb data
+      />
+
+      <InfiniteScroll
+        dataLength={images.length}
+        next={fetchMoreImages}
+        hasMore={images.length < allImages.length} // stops when all images loaded
+        loader={<div className="loader">Loading...</div>}
       >
-        {images.map((img, index) => (
-          <div className="gallery-item" key={index}>
-            <img src={img} alt={`Gallery ${index}`} />
-          </div>
-        ))}
-      </Masonry>
-    </InfiniteScroll>
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="my-masonry-grid"
+          columnClassName="my-masonry-grid_column"
+        >
+          {images.map((img, index) => (
+            <div className="gallery-item" key={index}>
+              <img src={img} alt={`Gallery ${index}`} />
+            </div>
+          ))}
+        </Masonry>
+      </InfiniteScroll>
+    </>
   );
 };
 

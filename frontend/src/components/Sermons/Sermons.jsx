@@ -1,10 +1,16 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import { Button, Modal, Container } from "react-bootstrap"; // Bootstrap Modal
-import InfiniteScroll from 'react-infinite-scroll-component';
+import InfiniteScroll from "react-infinite-scroll-component";
 import "./Sermons.css";
+import Header from '../Header/Header';
+import HeaderImage from "../../images/slider1.jpeg";
 
 const Sermons = () => {
+   const breadcrumbs = [
+    { text: "Home", link: "/" },
+    { text: "About Us", link: "/about" }
+  ];
   const [sermons, setSermons] = useState([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -82,6 +88,15 @@ const Sermons = () => {
   };
 
   return (
+    <>
+     <Header 
+        title="Sermons"
+        imageUrl={HeaderImage}  // Passing the background image
+        breadcrumbs={breadcrumbs}  // Passing breadcrumb data
+      />
+    
+    
+   
     <Container>
       {/* Live Video Player */}
       {liveVideoUrl ? (
@@ -150,8 +165,12 @@ const Sermons = () => {
               />
               <div className="sermon-info">
                 <h3 className="sermon-title">{formatDate(s.publishedAt)}</h3>
-                <p className="sermon-source">Source: {s.source?.toUpperCase()}</p>
-                <p className="sermon-description">{s.description?.split("\n")[0]}</p>
+                <p className="sermon-source">
+                  Source: {s.source?.toUpperCase()}
+                </p>
+                <p className="sermon-description">
+                  {s.description?.split("\n")[0]}
+                </p>
               </div>
             </div>
           ))}
@@ -170,9 +189,6 @@ const Sermons = () => {
         centered
         dialogClassName="custom-fullscreen-modal"
       >
-        <Modal.Header closeButton>
-          {/* <Modal.Title>{currentVideo?.title}</Modal.Title> */}
-        </Modal.Header>
         <Modal.Body>
           {/* <p>{currentVideo?.description}</p>  */}
 
@@ -195,7 +211,12 @@ const Sermons = () => {
                 src={`https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/${process.env.REACT_APP_FACEBOOK_PAGE_ID}/videos/${currentVideo.videoId}/&show_text=0&width=560`}
                 width="100%"
                 height="315"
-                style={{ border: "none", overflow: "hidden", width: "100%", height: "100vh"}}
+                style={{
+                  border: "none",
+                  overflow: "hidden",
+                  width: "100%",
+                  height: "100vh",
+                }}
                 scrolling="no"
                 frameBorder="0"
                 allowFullScreen
@@ -212,6 +233,7 @@ const Sermons = () => {
         </Modal.Footer>
       </Modal>
     </Container>
+     </>
   );
 };
 

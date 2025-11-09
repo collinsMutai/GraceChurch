@@ -1,0 +1,125 @@
+/* About Page Content */
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* 1 part image, 2 parts content */
+  gap: 2rem;
+  padding: 2.5rem 7.25rem;
+  margin-top: 2rem;
+  align-items: stretch; /* Ensures both the image and text stretch to same height */
+}
+
+/* Image Styles */
+.about-image {
+  height: 100%; /* Ensure image container takes up full height */
+  display: flex; /* Enable flex to make the image stretch properly */
+  justify-content: center; /* Optional: Centers the image horizontally */
+}
+
+.about-image img {
+  width: 100%; /* Make image take up the full width of the column */
+  height: 100%; /* Make image stretch to match the content height */
+  object-fit: cover; /* Ensures the image covers the full space without stretching */
+  border-radius: 8px; /* Optional: Keeps rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Adds shadow for better design */
+}
+
+/* Content Section */
+.about-text {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column; /* Stack content vertically */
+  justify-content: flex-start; /* Align content at the top */
+  height: 100%; /* Ensure content stretches to full height */
+}
+
+/* Text Styles */
+.about-text h2 {
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.about-text p {
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem; /* Added margin for spacing between paragraphs */
+}
+
+/* Core Values */
+.about-text ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.about-text li {
+  font-size: 1.1rem;
+  margin: 0.8rem 0;
+}
+
+.about-text li strong {
+  color: #2e6e76;
+  font-weight: bold;
+}
+
+/* Optional: Add spacing to separate each section */
+section {
+  margin-bottom: 3rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  /* Switch to single column layout */
+  .about-content {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    padding: 2rem 1rem; /* Reduce padding for smaller screens */
+  }
+
+  .about-image {
+    height: auto; /* Let the image size adjust based on the content */
+    margin-bottom: 1.5rem; /* Add space below the image */
+  }
+
+  .about-image img {
+    width: 100%; /* Ensure the image still takes full width */
+    height: auto; /* Adjust height automatically to maintain aspect ratio */
+    object-fit: cover; /* Ensures image still covers its space */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .about-text h2 {
+    font-size: 1.6rem; /* Reduce heading size on mobile */
+    margin-bottom: 0.8rem; /* Reduced margin */
+  }
+
+  .about-text p {
+    font-size: 1rem; /* Adjust font size for better readability */
+    margin-bottom: 1.2rem; /* Reduced spacing between paragraphs */
+  }
+
+  .about-text ul {
+    padding-left: 1rem; /* Add some left padding to the list */
+  }
+
+  .about-text li {
+    font-size: 1rem; /* Adjust font size of the list items */
+  }
+}
+
+/* Tablet Responsiveness (portrait mode) */
+@media (max-width: 1024px) {
+  /* Reduce padding and margin for tablets */
+  .about-content {
+    padding: 2rem;
+  }
+
+  .about-text h2 {
+    font-size: 1.8rem; /* Slightly smaller heading for tablets */
+  }
+
+  .about-text p {
+    font-size: 1.05rem; /* Adjust font size */
+  }
+}

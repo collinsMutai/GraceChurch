@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./ContactForm.css";
+import Header from "../Header/Header";
+import HeaderImage from "../../images/slider1.jpeg";
 
 /* =============================
    SVG Icon Components
@@ -165,6 +167,10 @@ const socialLinks = [
    ============================= */
 
 const ContactForm = () => {
+    const breadcrumbs = [
+    { text: "Home", link: "/" },
+    { text: "Contact Us", link: "/contact" }
+  ];
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -183,6 +189,13 @@ const ContactForm = () => {
   };
 
   return (
+    <>
+     <Header 
+        title="Contact Us"
+        imageUrl={HeaderImage}  // Passing the background image
+        breadcrumbs={breadcrumbs}  // Passing breadcrumb data
+      />
+   
     <div className="contact-form-container">
       {/* Contact Info Section */}
       <div className="contact-info">
@@ -323,6 +336,7 @@ const ContactForm = () => {
         </form>
       </div>
     </div>
+     </>
   );
 };
 
