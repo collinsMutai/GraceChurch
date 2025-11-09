@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
-import { Button, Modal, Container, Row, Col } from "react-bootstrap";  // Importing Bootstrap components
+import { Button, Modal, Container } from "react-bootstrap"; // Bootstrap Modal
+import InfiniteScroll from 'react-infinite-scroll-component';
 import "./Sermons.css";
 
 const Sermons = () => {
@@ -9,18 +10,15 @@ const Sermons = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(null);
-  const [liveVideoUrl, setLiveVideoUrl] = useState(null); // State for live video URL
-  const limit = 9;
-
+  const [liveVideoUrl, setLiveVideoUrl] = useState(null);
+  const limit = 8;
   const API_URL = useMemo(() => process.env.REACT_APP_API_URL || "", []);
 
-  // 🗓️ Format date as “29th October 2025”
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const day = date.getDate();
     const month = date.toLocaleString("en-KE", { month: "long" });
     const year = date.getFullYear();
-
     const suffix =
       day % 10 === 1 && day !== 11
         ? "st"
@@ -29,38 +27,25 @@ const Sermons = () => {
         : day % 10 === 3 && day !== 13
         ? "rd"
         : "th";
-
     return `${day}${suffix} ${month} ${year}`;
   };
 
-  // Fetch live video URL (Modify with actual API endpoint for live video)
   const fetchLiveVideo = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/live-video`);
+      const res = await axios.get(`${API_URL}/api/live-status`);
       if (res.data?.liveVideoUrl) {
-        setLiveVideoUrl(res.data.liveVideoUrl);  // Set live video URL
+        setLiveVideoUrl(res.data.liveVideoUrl);
       } else {
-        setLiveVideoUrl(null); // If no live video, set to null
+        setLiveVideoUrl(null);
       }
     } catch (err) {
       console.error("Error fetching live video:", err);
-      setLiveVideoUrl(null);  // Set to null if there's an error
+      setLiveVideoUrl(null);
     }
   }, [API_URL]);
 
   const fetchSermons = useCallback(
     async (pageNum = 1) => {
-      const cacheKey = `sermons_page_${pageNum}`;
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        setSermons((prev) =>
-          pageNum === 1 ? parsed.sermons : [...prev, ...parsed.sermons]
-        );
-        setTotal(parsed.total);
-        return;
-      }
-
       const controller = new AbortController();
       setLoading(true);
       try {
@@ -69,15 +54,11 @@ const Sermons = () => {
           { signal: controller.signal }
         );
         const data = res.data;
-
         setSermons((prev) =>
           pageNum === 1 ? data.sermons : [...prev, ...data.sermons]
         );
         setTotal(data.total);
-        sessionStorage.setItem(
-          cacheKey,
-          JSON.stringify({ sermons: data.sermons, total: data.total })
-        );
+        console.log("Fetched Sermons:", data.sermons);
       } catch (err) {
         if (!axios.isCancel(err)) console.error("Error fetching sermons:", err);
       } finally {
@@ -90,14 +71,14 @@ const Sermons = () => {
   );
 
   useEffect(() => {
-    fetchSermons(1);
-    fetchLiveVideo();  // Fetch live video URL when the component loads
+    fetchSermons(1); // Fetch first page of sermons
+    fetchLiveVideo(); // Fetch live video URL
   }, [fetchSermons, fetchLiveVideo]);
 
   const loadMore = () => {
     const nextPage = page + 1;
-    fetchSermons(nextPage);
     setPage(nextPage);
+    fetchSermons(nextPage);
   };
 
   return (
@@ -125,10 +106,18 @@ const Sermons = () => {
 
       <h2 className="sermons-heading text-center my-4">Previous Sermons</h2>
 
-      <Row>
-        {sermons.map((s) => (
-          <Col key={s._id} sm={12} md={4} lg={3}>
-            <div className="sermon-card">
+      {/* Infinite Scroll */}
+      <InfiniteScroll
+        dataLength={sermons.length} // Length of the current list
+        next={loadMore} // Function to load more sermons
+        hasMore={sermons.length < total} // Whether more sermons are available
+        loader={<h4>Loading...</h4>} // Loading message when more data is being fetched
+        endMessage={<p className="text-center">No more sermons to show.</p>} // Message displayed when no more data is available
+        scrollThreshold={0.9} // Trigger next fetch when 90% of the content is visible
+      >
+        <div className="sermons-grid">
+          {sermons.map((s) => (
+            <div key={s._id} className="sermon-card">
               {/* Video icon overlay */}
               <div
                 className="video-icon"
@@ -162,25 +151,12 @@ const Sermons = () => {
               <div className="sermon-info">
                 <h3 className="sermon-title">{formatDate(s.publishedAt)}</h3>
                 <p className="sermon-source">Source: {s.source?.toUpperCase()}</p>
+                <p className="sermon-description">{s.description?.split("\n")[0]}</p>
               </div>
             </div>
-          </Col>
-        ))}
-      </Row>
-
-      {sermons.length < total && (
-        <div className="text-center my-4">
-          <Button
-          className="load-more-btn"
-            onClick={loadMore}
-            disabled={loading}
-            variant=""
-            size="lg"
-          >
-            {loading ? "Loading..." : "Load More"}
-          </Button>
+          ))}
         </div>
-      )}
+      </InfiniteScroll>
 
       {!loading && sermons.length === 0 && (
         <p className="text-center">No sermons found.</p>
@@ -190,13 +166,16 @@ const Sermons = () => {
       <Modal
         show={!!currentVideo}
         onHide={() => setCurrentVideo(null)}
-        size="lg"
+        size="fullscreen"
         centered
+        dialogClassName="custom-fullscreen-modal"
       >
         <Modal.Header closeButton>
-          <Modal.Title>{currentVideo?.title}</Modal.Title>
+          {/* <Modal.Title>{currentVideo?.title}</Modal.Title> */}
         </Modal.Header>
         <Modal.Body>
+          {/* <p>{currentVideo?.description}</p>  */}
+
           {currentVideo?.source === "youtube" && (
             <div className="embed-responsive embed-responsive-16by9">
               <iframe
@@ -216,7 +195,7 @@ const Sermons = () => {
                 src={`https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/${process.env.REACT_APP_FACEBOOK_PAGE_ID}/videos/${currentVideo.videoId}/&show_text=0&width=560`}
                 width="100%"
                 height="315"
-                style={{ border: "none", overflow: "hidden" }}
+                style={{ border: "none", overflow: "hidden", width: "100%", height: "100vh"}}
                 scrolling="no"
                 frameBorder="0"
                 allowFullScreen

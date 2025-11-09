@@ -44,11 +44,10 @@ async function runSermonSync() {
   }
 }
 
-/** Schedule weekly cron + optional immediate run */
 exports.startCron = (runImmediately = false) => {
-  // Run every Sunday at 2 PM
-  cron.schedule("0 14 * * SUN", runSermonSync);
-  console.log("✅ Weekly sermon sync scheduled (Sunday 2 PM)");
+  // Run daily at 1 PM Kenyan time (EAT) which is 10 AM UTC
+  cron.schedule("0 10 * * *", runSermonSync);
+  console.log("✅ Daily sermon sync scheduled (1 PM Kenyan Time, 10 AM UTC)");
 
   // Optional: immediate run on deploy/startup
   if (runImmediately) {

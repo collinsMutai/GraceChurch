@@ -1,3 +1,31 @@
+/* Fullscreen Video Modal */
+.custom-fullscreen-modal .modal-dialog {
+  max-width: 100%;
+  margin: 0;
+  height: 100%;
+  max-height: 100%;
+  margin-top: 0;
+}
+
+.custom-fullscreen-modal .modal-content {
+  height: 100%;
+  border-radius: 0;
+  border: none;
+}
+
+.custom-fullscreen-modal .modal-body {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+
+
+/* Main Container */
 .sermons-container {
   padding: 2.5rem 9.25rem; /* desktop */
   max-width: 80rem;
@@ -17,12 +45,15 @@
   color: var(--text-red-color);
 }
 
+/* Grid Layout for Sermon Cards */
 .sermons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Auto adjust grid items */
+  gap: 1.5rem; /* Gap between cards */
+  padding: 0 1rem; /* Optional: Adding padding to the grid */
 }
 
+/* Sermon Card Styles */
 .sermon-card {
   position: relative;
   background-color: var(--bg-white);
@@ -33,6 +64,7 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  height: 100%; /* Ensures that the card takes full height of grid space */
 }
 
 .sermon-card:hover {
@@ -66,12 +98,13 @@
   background-color: var(--text-red-dark-color);
 }
 
-/* Sermon Info */
+/* Sermon Info Section */
 .sermon-info {
   padding: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  height: 100%;
 }
 
 .sermon-title {
@@ -92,31 +125,17 @@
   margin-top: 0.25rem;
 }
 
-/* -------- Load More Button -------- */
-.sermons-load-more {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-}
-
-.load-more-btn {
-  background-color: var(--text-red-color) !important;
-  color: #fff !important;
-  padding: 0.5rem 1.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  outline: none;
-}
-
-.load-more-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* ------------ Infinite Scroll Loader Styles ------------ */
+.infinite-scroll-loader {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: var(--text-gray);
 }
 
 /* -------------------- Modal -------------------- */
 
+/* Video Modal Styles */
 .video-modal {
   position: fixed;
   top: 0;
@@ -135,7 +154,7 @@
   width: 80%;
   max-width: 900px;
   height: 0;
-  padding-bottom: 56.25%;
+  padding-bottom: 56.25%; /* Aspect ratio 16:9 */
   background: #000;
   border-radius: 0.5rem;
   overflow: hidden;
@@ -181,5 +200,21 @@
   .video-wrapper {
     width: 95%;
     padding-bottom: 56.25%;
+  }
+
+  .sermons-container {
+    padding: 2rem 1rem; /* Adjust padding for smaller screens */
+  }
+
+  .sermons-heading {
+    font-size: 1.5rem; /* Reduce heading size on smaller screens */
+  }
+
+  .sermons-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* More flexibility for small screens */
+  }
+
+  .sermon-card {
+    height: auto; /* Remove the fixed height on smaller screens */
   }
 }

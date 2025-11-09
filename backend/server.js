@@ -127,7 +127,6 @@ const checkYouTubeLive = async () => {
   }
 };
 
-// Function to check Facebook live status with retries and DB fallback
 const checkFacebookLive = async () => {
   const params = {
     status: "LIVE_NOW",
@@ -141,12 +140,21 @@ const checkFacebookLive = async () => {
       params
     );
 
-     console.log('sermons', result);
-    
-    fbIsLive = data.data?.length > 0;
-    if (fbIsLive !== prevFbStatus) {
-      prevFbStatus = fbIsLive;
-      if (shouldLog("info")) liveLogger.info(`🎬 Facebook is now ${fbIsLive ? "LIVE" : "offline"}`);
+    console.log("Facebook API Response:", data);
+
+    // If no live videos are found or the status is not LIVE_NOW
+    if (data.data && data.data.length > 0) {
+      const liveVideo = data.data[0];
+      if (liveVideo.status === "LIVE_NOW") {
+        fbIsLive = true;
+        if (shouldLog("info")) liveLogger.info(`🎬 Facebook is now LIVE. Video ID: ${liveVideo.id}`);
+      } else {
+        fbIsLive = false;
+        if (shouldLog("info")) liveLogger.info("⚠️ Facebook live status is not LIVE_NOW. Current status: " + liveVideo.status);
+      }
+    } else {
+      fbIsLive = false;
+      if (shouldLog("info")) liveLogger.info("⚠️ No live video found on Facebook.");
     }
   } catch (err) {
     // Fallback to database if Facebook API fails
@@ -165,6 +173,7 @@ const checkFacebookLive = async () => {
     }
   }
 };
+
 
 // Run every 2 minutes
 setInterval(() => {

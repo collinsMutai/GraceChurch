@@ -1,8 +1,11 @@
+// routes/sermonRoutes.js
 const express = require("express");
 const router = express.Router();
-const { getSermons, refreshSermons } = require("../controllers/sermonController");
+const { getSermons, fetchLiveVideo } = require("../controllers/sermonController");
 
+// Define your routes properly
 router.get("/", getSermons);
-router.post("/refresh", refreshSermons); // for admin or cron trigger
+// router.post("/refresh", refreshSermons); 
+router.get("/live", fetchLiveVideo); // for admin or cron trigger
 
 module.exports = router;
