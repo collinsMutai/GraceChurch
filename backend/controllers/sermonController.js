@@ -1,9 +1,29 @@
+// sermonController.js
+
 const axios = require("axios");
 const Sermon = require("../models/Sermon");
 const { fetchYouTubeSermons } = require("../utils/youtube");
 const { fetchFacebookSermons } = require("../utils/facebook");
 
 const { FACEBOOK_PAGE_ID, FACEBOOK_ACCESS_TOKEN, YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID } = process.env;
+
+// Retry logic for API requests with exponential backoff
+const retryApiRequest = async (url, params, maxRetries = 3, delay = 1000) => {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      const res = await axios.get(url, { params });
+      return res.data;
+    } catch (err) {
+      attempt += 1;
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, delay * attempt)); // Exponential backoff
+      } else {
+        throw err;
+      }
+    }
+  }
+};
 
 // Fetch Facebook live video status
 const fetchLiveVideo = async () => {
@@ -28,7 +48,6 @@ const fetchLiveVideo = async () => {
       return { platform: 'Facebook', status: 'NOT_LIVE', message: 'No live video is currently streaming.' };
     }
   } catch (err) {
-    console.error('Error fetching live video from Facebook:', err.message);
     return { platform: 'Facebook', error: 'Failed to fetch live video from Facebook' };
   }
 };
@@ -57,18 +76,17 @@ const checkYouTubeLive = async () => {
       return { platform: 'YouTube', status: 'NOT_LIVE', message: 'No live video on YouTube' };
     }
   } catch (err) {
-    console.error("Error checking YouTube live status:", err.message);
     return { platform: 'YouTube', error: 'Failed to fetch live video from YouTube' };
   }
 };
 
+// Get all sermons with pagination and live statuses
 const getSermons = async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, parseInt(req.query.limit) || 9);
     const skip = (page - 1) * limit;
 
-    // Query MongoDB efficiently to fetch sermons with pagination
     const [sermons, total] = await Promise.all([
       Sermon.find({}, "title videoId thumbnail description publishedAt permalink source")
         .sort({ publishedAt: -1 })
@@ -78,30 +96,26 @@ const getSermons = async (req, res) => {
       Sermon.estimatedDocumentCount(),
     ]);
 
-    // Fetch live video status for both Facebook and YouTube
     const facebookLive = await fetchLiveVideo();
     const youtubeLive = await checkYouTubeLive();
 
-    // Combine sermons and live video status into the result
     const result = { sermons, total, facebookLive, youtubeLive };
 
     res.json(result);
   } catch (err) {
-    console.error("Get sermons error:", err.message);
     res.status(500).json({ error: "Failed to fetch sermons" });
   }
 };
 
-// const refreshSermons = async (req, res) => {
-//   try {
-//     const results = await Promise.allSettled([fetchYouTubeSermons(), fetchFacebookSermons()]);
+// Refresh sermons by fetching from YouTube and Facebook
+const refreshSermons = async (req, res) => {
+  try {
+    const results = await Promise.allSettled([fetchYouTubeSermons(), fetchFacebookSermons()]);
+    const status = results.map((r) => r.status);
+    res.json({ message: "Sermons refreshed", status });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to refresh sermons" });
+  }
+};
 
-//     const status = results.map((r) => r.status);
-//     res.json({ message: "Sermons refreshed", status });
-//   } catch (err) {
-//     console.error("Refresh sermons error:", err.message);
-//     res.status(500).json({ error: "Failed to refresh sermons" });
-//   }
-// };
-
-module.exports = { getSermons, fetchLiveVideo };
+module.exports = { getSermons, refreshSermons, fetchLiveVideo, checkYouTubeLive };

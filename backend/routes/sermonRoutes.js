@@ -1,11 +1,13 @@
-// routes/sermonRoutes.js
+// sermonRoutes.js
+
 const express = require("express");
 const router = express.Router();
-const { getSermons, fetchLiveVideo } = require("../controllers/sermonController");
+const { getSermons, refreshSermons } = require("../controllers/sermonController");
 
-// Define your routes properly
+// Route to get sermons with live statuses
 router.get("/", getSermons);
-// router.post("/refresh", refreshSermons); 
-router.get("/live", fetchLiveVideo); // for admin or cron trigger
+
+// Route to refresh sermons from YouTube and Facebook
+router.post("/refresh", refreshSermons);
 
 module.exports = router;
